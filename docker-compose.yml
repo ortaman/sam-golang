@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+
+  # Postgres
+  stori-db:
+    image: postgres
+    container_name: stori-db
+    volumes:
+      - ./volumes/pgdata:/var/lib/postgresql/data/
+      - ./db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
+    environment:
+       - POSTGRES_DB=db_stori
+       - POSTGRES_HOST=localhost
+       - POSTGRES_PORT=5432
+       - POSTGRES_USER=db_user
+       - POSTGRES_PASSWORD=db_pass
+    ports:
+      - 5432:5432
+    expose:
+      - 5432

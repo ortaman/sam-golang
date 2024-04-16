@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Timeout: 5
+    MemorySize: 128
+
+Resources:
+  StoriTestFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Architectures:
+        - x86_64
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            Path: /stori-test
+            Method: POST
+      Environment:
+        Variables:
+          SMTP_HOST: "smtp.gmail.com"
+          SMTP_PORT: "587"
+          EMAIL_FROM: "ente011@gmail.com"
+	        EMAIL_PASS: "mjjr aekr oikv qclv"
+          EMAIL_TO: "ente_11@hotmail.com"
+          DB_NAME: db_stori
+          DB_USER: db_user
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_PASSWORD: bd_pass
+    Metadata:
+      DockerTag: provided.al2023-v1
+      DockerContext: ./stori-test
+      Dockerfile: Dockerfile
+
+Outputs:
+  StoriTestAPI:
+    Description: "API Gateway endpoint URL for Prod environment for Stori Test Function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/stori-test/"
+  StoriTestFunction:
+    Description: "Stori Test Lambda Function ARN"
+    Value: !GetAtt StortiTestFunction.Arn
+  StoriTestFunctionIamRole:
+    Description: "Implicit IAM Role created for Stori Test function"
+    Value: !GetAtt StoriTestFunctionRole.Arn
