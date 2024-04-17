@@ -1,12 +1,15 @@
 package usecase
 
 import (
+	"bytes"
 	"encoding/csv"
 	"fmt"
 	"math"
+	"net/smtp"
 	"os"
 	"strconv"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/ortaman/stori-test/entity"
@@ -59,10 +62,10 @@ func validateTransaction(csvLine []string) (entity.Transaction, error) {
 	return transaction, nil
 }
 
-func LoadTransactions() ([]entity.Transaction, error) {
+func LoadTransactions(csvDir string) ([]entity.Transaction, error) {
 	var transactionData []entity.Transaction
 
-	csvFile, err := os.Open("txns.csv")
+	csvFile, err := os.Open(csvDir)
 
 	if err != nil {
 		return nil, fmt.Errorf("%s", err.Error())
@@ -139,4 +142,36 @@ func GetTransactionsResume(transactions []entity.Transaction) (entity.Transactio
 		AverageCredit:      roundFloat(averageCredit, 2),
 		TxnsNumberPerMonth: txnsNumberPerMonth,
 	}, nil
+}
+
+func SendEmail(email_to []string, termplateDir string, transactionResume *entity.TransactionResume) error {
+	from := "ente011@gmail.com"
+	password := "mjjr aekr oikv qclv"
+
+	smtpHost := "smtp.gmail.com"
+	smtpPort := "587"
+
+	// Message
+	var body bytes.Buffer
+
+	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
+	body.Write([]byte(fmt.Sprintf("Subject: Stori Test \n%s\n\n", mimeHeaders)))
+
+	template, TemplatError := template.ParseFiles(termplateDir)
+
+	if TemplatError != nil {
+		return fmt.Errorf("%s", TemplatError.Error())
+	}
+
+	template.Execute(&body, transactionResume)
+
+	// Authentication and send email
+	auth := smtp.PlainAuth("", from, password, smtpHost)
+	emailError := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, email_to, body.Bytes())
+
+	if emailError != nil {
+		return fmt.Errorf("%s", emailError.Error())
+	}
+
+	return nil
 }

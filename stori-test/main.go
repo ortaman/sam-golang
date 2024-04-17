@@ -31,7 +31,8 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		}, nil
 	}
 
-	transactions, err := usecase.LoadTransactions()
+	csvDir := "./txns.csv"
+	transactions, err := usecase.LoadTransactions(csvDir)
 
 	if err != nil {
 		return events.APIGatewayProxyResponse{
@@ -41,8 +42,14 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 
 	transactionsResume, _ := usecase.GetTransactionsResume(transactions)
+	templateDir := "./txns_template.html"
 
-	fmt.Println("transactionsResume", transactionsResume)
+	if err := usecase.SendEmail([]string{email}, templateDir, &transactionsResume); err != nil {
+		return events.APIGatewayProxyResponse{
+			Body:       err.Error(),
+			StatusCode: 400,
+		}, nil
+	}
 
 	return events.APIGatewayProxyResponse{
 		Body:       fmt.Sprintf("Transactions Resume sent : %s", email),

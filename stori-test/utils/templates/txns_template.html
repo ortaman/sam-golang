@@ -1,0 +1,68 @@
+<html>
+    <head>
+        <link rel="stylesheet">
+    </head>
+    <body>
+        <img style="max-width: 100%; display: block; margin-left: auto; margin-right: auto;" src="https://man-bucket.s3.amazonaws.com/stori_logo.jpg"/>
+        <h2 style="text-align: center; font-weight: bold">
+            Transactions Summary
+        </h2>
+        <table style="width: 100%; padding: 0px 100px 0px 100px;">
+            <tbody style="font-size: 14px;">
+                <tr>
+                    <td style="
+                        text-align: left;
+                        vertical-align: middle;
+                        text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.1);
+                        border-bottom: 1px solid #C1C3D1;
+                        padding: 15px 20px 15px 20px;
+                        width: 50%;">
+                   Average debit amount: {{.AverageDebit}}</td>
+                    <td style="
+                        text-align: left;
+                        vertical-align: middle;
+                        text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.1);
+                        border-bottom: 1px solid #C1C3D1;
+                        padding: 15px 20px 15px 20px;
+                        width: 50%;">
+                    Average credit amount: {{.AverageCredit}} </td>
+                </tr>
+                <tr>
+                    <td style="
+                        text-align: left;
+                        vertical-align: middle;
+                        text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.1);
+                        border-bottom: 1px solid #C1C3D1;
+                        padding: 15px 20px 15px 20px;
+                        width: 50%;">
+                    Total balance is: {{.TotalBalance}}
+                    </td>
+                </tr>
+                <tr>
+            </tbody>
+        </table>
+        <h2 style="text-align: center; font-weight: bold; margin-top: 50px;">
+            Transactions by Month
+        </h2>
+        <table style="width: 100%; padding: 0px 100px 0px 100px;">
+            <tbody style="font-size: 14px;">
+                <tr>
+                    {{range $month, $total := .TxnsNumberPerMonth}}
+                        <tr></tr>
+                        <td style="
+                        text-align: left;
+                        vertical-align: middle;
+                        text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.1);
+                        border-bottom: 1px solid #C1C3D1;
+                        padding: 15px 20px 15px 20px;
+                        width: 50%;">
+                        Number of transactions in  {{$month}}: {{$total}} </td>
+                    {{ end }}
+                </tr>
+            </tbody>
+        </table>
+        <p style="text-align: center; font-size:12px">
+            Este correo es informativo, favor no responder a esta direccion de correo.
+        </p>
+    </body>
+</html>
