@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 
 	"github.com/ortaman/stori-test/adapters"
+	"github.com/ortaman/stori-test/repository"
 	"github.com/ortaman/stori-test/usecase"
 
 	_ "github.com/lib/pq"
@@ -52,16 +53,16 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			Body:       err.Error(),
-			StatusCode: 400,
+			StatusCode: 500,
 		}, nil
 	}
 
 	transactionsResume, _ := usecase.GetTransactionsResume(&transactionData)
 
-	if err := usecase.SendEmail([]string{email}, templateDir, &transactionsResume); err != nil {
+	if err := repository.SendEmail([]string{email}, templateDir, &transactionsResume); err != nil {
 		return events.APIGatewayProxyResponse{
 			Body:       err.Error(),
-			StatusCode: 400,
+			StatusCode: 500,
 		}, nil
 	}
 
