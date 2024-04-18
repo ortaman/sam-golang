@@ -4,6 +4,7 @@ COPY go.mod go.sum main.go ./
 COPY entity ./entity
 COPY repository ./repository
 COPY usecase ./usecase
+COPY adapters ./adapters
 COPY utils ./utils
 
 RUN go build -o lambda-handler

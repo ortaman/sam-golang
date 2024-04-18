@@ -6,10 +6,16 @@ Globals:
     Timeout: 5
     MemorySize: 128
 
+Parameters:
+  DockerTag:
+    Type: String
+    Default: local-stori-dev
+
 Resources:
   StoriTestFunction:
     Type: AWS::Serverless::Function
     Properties:
+      ImageUri: !Sub 'storitestfunction:${DockerTag}' 
       PackageType: Image
       Architectures:
         - x86_64
@@ -24,15 +30,14 @@ Resources:
           SMTP_HOST: "smtp.gmail.com"
           SMTP_PORT: "587"
           EMAIL_FROM: "ente011@gmail.com"
-	        EMAIL_PASS: "mjjr aekr oikv qclv"
-          EMAIL_TO: "ente_11@hotmail.com"
-          DB_NAME: db_stori
-          DB_USER: db_user
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_PASSWORD: bd_pass
+          EMAIL_CODE: "mjjr aekr oikv qclv"
+          DB_NAME: "db_stori"
+          DB_USER: "db_user"
+          DB_HOST: "localhost"
+          DB_PORT: "5432"
+          DB_PASSWORD: "bd_pass"
     Metadata:
-      DockerTag: provided.al2023-v1
+      DockerTag: !Ref DockerTag
       DockerContext: ./stori-test
       Dockerfile: Dockerfile
 

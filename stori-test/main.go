@@ -7,12 +7,19 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 
+	"github.com/ortaman/stori-test/adapters"
 	"github.com/ortaman/stori-test/usecase"
 
 	_ "github.com/lib/pq"
 )
 
+const (
+	csvDir      = "./txns.csv"
+	templateDir = "./txns_template.html"
+)
+
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+
 	bodyMap := map[string]string{}
 
 	if err := json.Unmarshal([]byte(request.Body), &bodyMap); err != nil {
@@ -31,8 +38,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		}, nil
 	}
 
-	csvDir := "./txns.csv"
-	transactions, err := usecase.LoadTransactions(csvDir)
+	csvLinesPointer, err := adapters.ReadAllCSV(csvDir)
 
 	if err != nil {
 		return events.APIGatewayProxyResponse{
@@ -41,8 +47,16 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		}, nil
 	}
 
-	transactionsResume, _ := usecase.GetTransactionsResume(transactions)
-	templateDir := "./txns_template.html"
+	transactionData, err := adapters.ValidateTransactionsFromCSV(csvLinesPointer)
+
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			Body:       err.Error(),
+			StatusCode: 400,
+		}, nil
+	}
+
+	transactionsResume, _ := usecase.GetTransactionsResume(&transactionData)
 
 	if err := usecase.SendEmail([]string{email}, templateDir, &transactionsResume); err != nil {
 		return events.APIGatewayProxyResponse{
