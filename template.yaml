@@ -27,15 +27,16 @@ Resources:
             Method: POST
       Environment:
         Variables:
-          SMTP_HOST: "smtp.gmail.com"
+          SMTP_HOST: smtp.gmail.com
           SMTP_PORT: "587"
-          EMAIL_FROM: "ente011@gmail.com"
+          EMAIL_FROM: ente011@gmail.com
           EMAIL_CODE: "mjjr aekr oikv qclv"
-          DB_NAME: "db_stori"
-          DB_USER: "db_user"
-          DB_HOST: "localhost"
+          DB_DRIVER: postgres
+          DB_NAME: db_stori
+          DB_USER: db_user
+          DB_HOST: localhost
           DB_PORT: "5432"
-          DB_PASSWORD: "bd_pass"
+          DB_PASS: "bd_pass"
     Metadata:
       DockerTag: !Ref DockerTag
       DockerContext: ./stori-test

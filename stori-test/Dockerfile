@@ -1,6 +1,7 @@
 FROM public.ecr.aws/docker/library/golang:1.22.2 as build-image
 WORKDIR /src
 COPY go.mod go.sum main.go ./
+COPY infra ./infra
 COPY entity ./entity
 COPY repository ./repository
 COPY usecase ./usecase

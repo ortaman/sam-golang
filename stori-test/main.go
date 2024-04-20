@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 
 	"github.com/ortaman/stori-test/adapters"
+	"github.com/ortaman/stori-test/infra"
 	"github.com/ortaman/stori-test/repository"
 	"github.com/ortaman/stori-test/usecase"
 
@@ -65,6 +66,14 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 			StatusCode: 500,
 		}, nil
 	}
+
+	// Get or create customer
+	db := infra.NewMyPSQLConnection()
+	userRepository := repository.NewUserRepository(db)
+	user_id := usecase.NewUserUsecase(userRepository).GetOrCreateUser("ente11@gmail.com")
+
+	fmt.Println("************END*****************")
+	fmt.Println(user_id)
 
 	return events.APIGatewayProxyResponse{
 		Body:       fmt.Sprintf("Transactions Resume sent : %s", email),

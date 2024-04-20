@@ -1,5 +1,7 @@
 version: "3.8"
 
+# Docker compose to get up the local postgress db
+
 services:
 
   # Postgres
@@ -7,8 +9,8 @@ services:
     image: postgres
     container_name: stori-db
     volumes:
-      - ./volumes/pgdata:/var/lib/postgresql/data/
-      - ./db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
+      - ./local-db/volumes/pgdata:/var/lib/postgresql/data/
+      - ./local-db/db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
     environment:
        - POSTGRES_DB=db_stori
        - POSTGRES_HOST=localhost
