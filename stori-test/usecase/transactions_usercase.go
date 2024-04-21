@@ -5,6 +5,32 @@ import (
 	"github.com/ortaman/stori-test/utils"
 )
 
+type TnxsUsercase struct {
+	TnxsRepoI entity.TnxsRepoI
+}
+
+func NewTnxsUsecase(tnxsRepoI entity.TnxsRepoI) entity.TnxsUseCaseI {
+
+	return &TnxsUsercase{
+		TnxsRepoI: tnxsRepoI,
+	}
+}
+
+func (tnxsUsercase *TnxsUsercase) SaveTransactions(email string, transactions *[]entity.Transaction) error {
+
+	customer_id := tnxsUsercase.TnxsRepoI.GetUserByEmail(email)
+
+	if customer_id < 0 {
+		customer_id = tnxsUsercase.TnxsRepoI.CreateUser(email)
+	}
+
+	if err := tnxsUsercase.TnxsRepoI.SaveTransactions(customer_id, transactions); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func GetTransactionsResume(transactions *[]entity.Transaction) (entity.TransactionResume, error) {
 	var (
 		averageDebit    float64 = 0.0

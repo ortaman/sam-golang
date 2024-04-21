@@ -22,6 +22,7 @@ const (
 
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
+	// Validate that email exis in the body request
 	bodyMap := map[string]string{}
 
 	if err := json.Unmarshal([]byte(request.Body), &bodyMap); err != nil {
@@ -40,6 +41,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		}, nil
 	}
 
+	// Read csv file
 	csvLinesPointer, err := adapters.ReadAllCSV(csvDir)
 
 	if err != nil {
@@ -49,6 +51,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		}, nil
 	}
 
+	// Validate csv file and load data in a slice
 	transactionData, err := adapters.ValidateTransactionsFromCSV(csvLinesPointer)
 
 	if err != nil {
@@ -58,8 +61,10 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		}, nil
 	}
 
+	// Calculate transactions resume
 	transactionsResume, _ := usecase.GetTransactionsResume(&transactionData)
 
+	// Send email
 	if err := repository.SendEmail([]string{email}, templateDir, &transactionsResume); err != nil {
 		return events.APIGatewayProxyResponse{
 			Body:       err.Error(),
@@ -67,13 +72,11 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		}, nil
 	}
 
-	// Get or create customer
+	// Save the Transactions
 	db := infra.NewMyPSQLConnection()
-	userRepository := repository.NewUserRepository(db)
-	user_id := usecase.NewUserUsecase(userRepository).GetOrCreateUser("ente11@gmail.com")
-
-	fmt.Println("************END*****************")
-	fmt.Println(user_id)
+	dbRepository := repository.NewSQLRepository(db)
+	tnxsUsercase := usecase.NewTnxsUsecase(dbRepository)
+	tnxsUsercase.SaveTransactions(email, &transactionData)
 
 	return events.APIGatewayProxyResponse{
 		Body:       fmt.Sprintf("Transactions Resume sent : %s", email),

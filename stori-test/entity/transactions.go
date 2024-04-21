@@ -15,3 +15,13 @@ type (
 		TxnsNumberPerMonth map[string]int
 	}
 )
+
+type TnxsUseCaseI interface {
+	SaveTransactions(email string, transactions *[]Transaction) error
+}
+
+type TnxsRepoI interface {
+	GetUserByEmail(email string) int
+	CreateUser(email string) int
+	SaveTransactions(customer_id int, transactions *[]Transaction) error
+}
