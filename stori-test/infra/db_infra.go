@@ -17,9 +17,6 @@ func NewMyPSQLConnection() *sql.DB {
 		dbName   = os.Getenv("DB_NAME")
 	)
 
-	// psqlInfo := "host=localhost port=5432 user=db_user password=db_pass dbname=db_stori sslmode=disable"
-	// export DB_HOST="host.docker.internal" DB_PORT="5432" DB_USER="db_user" DB_PASS="db_pass" DB_NAME="db_stori" sslmode="disable" DB_DRIVER="postgres"
-
 	psqlInfo := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbName)
@@ -39,4 +36,15 @@ func NewMyPSQLConnection() *sql.DB {
 	fmt.Println("Successfully connected!")
 
 	return db
+}
+
+func NewPSQLConfig() *map[string]string {
+
+	config := map[string]string{
+		"from":     os.Getenv("EMAIL_FROM"),
+		"password": os.Getenv("EMAIL_CODE"),
+		"smtpHost": os.Getenv("SMTP_HOST"),
+		"smtpPort": string(os.Getenv("SMTP_PORT")),
+	}
+	return &config
 }

@@ -6,13 +6,15 @@ import (
 )
 
 type TnxsUsercase struct {
-	TnxsRepoI entity.TnxsRepoI
+	TnxsRepoI  entity.TnxsRepoI
+	emailRepoI entity.EmailRepoI
 }
 
-func NewTnxsUsecase(tnxsRepoI entity.TnxsRepoI) entity.TnxsUseCaseI {
+func NewTnxsUsecase(tnxsRepoI entity.TnxsRepoI, emailRepoI entity.EmailRepoI) entity.TnxsUseCaseI {
 
 	return &TnxsUsercase{
-		TnxsRepoI: tnxsRepoI,
+		TnxsRepoI:  tnxsRepoI,
+		emailRepoI: emailRepoI,
 	}
 }
 
@@ -31,7 +33,22 @@ func (tnxsUsercase *TnxsUsercase) SaveTransactions(email string, transactions *[
 	return nil
 }
 
-func GetTransactionsResume(transactions *[]entity.Transaction) (entity.TransactionResume, error) {
+func (tnxsUsercase *TnxsUsercase) GetTransactionsResume(email string, transactions *[]entity.Transaction) error {
+
+	customer_id := tnxsUsercase.TnxsRepoI.GetUserByEmail(email)
+
+	if customer_id < 0 {
+		customer_id = tnxsUsercase.TnxsRepoI.CreateUser(email)
+	}
+
+	if err := tnxsUsercase.TnxsRepoI.SaveTransactions(customer_id, transactions); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (tnxsUsercase *TnxsUsercase) SendEmail(transactions *[]entity.Transaction, emails_to []string, termplateDir string) error {
 	var (
 		averageDebit    float64 = 0.0
 		averageCredit   float64 = 0.0
@@ -65,10 +82,14 @@ func GetTransactionsResume(transactions *[]entity.Transaction) (entity.Transacti
 		averageCredit = averageCredit / txsNumberCredit
 	}
 
-	return entity.TransactionResume{
+	transactionResume := entity.TransactionResume{
 		TotalBalance:       utils.RoundFloat(totalBalance, 2),
 		AverageDebit:       utils.RoundFloat(averageDebit, 2),
 		AverageCredit:      utils.RoundFloat(averageCredit, 2),
 		TxnsNumberPerMonth: txnsNumberPerMonth,
-	}, nil
+	}
+
+	tnxsUsercase.emailRepoI.SendEmail(&transactionResume, emails_to, termplateDir)
+
+	return nil
 }

@@ -61,22 +61,16 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		}, nil
 	}
 
-	// Calculate transactions resume
-	transactionsResume, _ := usecase.GetTransactionsResume(&transactionData)
-
-	// Send email
-	if err := repository.SendEmail([]string{email}, templateDir, &transactionsResume); err != nil {
-		return events.APIGatewayProxyResponse{
-			Body:       err.Error(),
-			StatusCode: 500,
-		}, nil
-	}
-
-	// Save the Transactions
 	db := infra.NewMyPSQLConnection()
+	PSQConfig := infra.NewPSQLConfig()
+
 	dbRepository := repository.NewSQLRepository(db)
-	tnxsUsercase := usecase.NewTnxsUsecase(dbRepository)
+	emailRepository := repository.NewEmailRepository(PSQConfig)
+
+	tnxsUsercase := usecase.NewTnxsUsecase(dbRepository, emailRepository)
+
 	tnxsUsercase.SaveTransactions(email, &transactionData)
+	tnxsUsercase.SendEmail(&transactionData, []string{email}, templateDir)
 
 	return events.APIGatewayProxyResponse{
 		Body:       fmt.Sprintf("Transactions Resume sent : %s", email),

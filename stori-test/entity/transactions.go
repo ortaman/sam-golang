@@ -18,10 +18,20 @@ type (
 
 type TnxsUseCaseI interface {
 	SaveTransactions(email string, transactions *[]Transaction) error
+	SendEmail(transactions *[]Transaction, emails_to []string, termplateDir string) error
 }
 
 type TnxsRepoI interface {
 	GetUserByEmail(email string) int
 	CreateUser(email string) int
 	SaveTransactions(customer_id int, transactions *[]Transaction) error
+}
+
+type (
+	Email struct {
+	}
+)
+
+type EmailRepoI interface {
+	SendEmail(transactionsResume *TransactionResume, emails_to []string, termplateDir string) error
 }

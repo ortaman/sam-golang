@@ -4,19 +4,20 @@ import (
 	"bytes"
 	"fmt"
 	"net/smtp"
-	"os"
 	"text/template"
 
 	"github.com/ortaman/stori-test/entity"
 )
 
-func SendEmail(email_to []string, termplateDir string, transactionResume *entity.TransactionResume) error {
-	from := os.Getenv("EMAIL_FROM")
-	password := os.Getenv("EMAIL_CODE")
+type EmailRepository struct {
+	PSQLConfig *map[string]string
+}
 
-	smtpHost := os.Getenv("SMTP_HOST")
-	smtpPort := os.Getenv("SMTP_PORT")
+func NewEmailRepository(PSQLConfig *map[string]string) entity.EmailRepoI {
+	return &EmailRepository{PSQLConfig}
+}
 
+func (emailRepository *EmailRepository) SendEmail(transactionsResume *entity.TransactionResume, emails_to []string, termplateDir string) error {
 	// Message
 	var body bytes.Buffer
 
@@ -29,11 +30,19 @@ func SendEmail(email_to []string, termplateDir string, transactionResume *entity
 		return fmt.Errorf("%s", TemplatError.Error())
 	}
 
-	template.Execute(&body, transactionResume)
+	template.Execute(&body, *transactionsResume)
+
+	Emailconfig := *emailRepository.PSQLConfig
 
 	// Authentication and send email
-	auth := smtp.PlainAuth("", from, password, smtpHost)
-	emailError := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, email_to, body.Bytes())
+	auth := smtp.PlainAuth("", Emailconfig["from"], Emailconfig["password"], Emailconfig["smtpHost"])
+
+	emailError := smtp.SendMail(
+		Emailconfig["smtpHost"]+":"+Emailconfig["smtpPort"],
+		auth,
+		Emailconfig["from"],
+		emails_to,
+		body.Bytes())
 
 	if emailError != nil {
 		return fmt.Errorf("%s", emailError.Error())
