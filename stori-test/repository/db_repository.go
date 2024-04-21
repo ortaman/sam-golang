@@ -40,7 +40,7 @@ func (dbRepository *DBRepository) GetUserByEmail(email string) int {
 
 	switch err {
 	case sql.ErrNoRows:
-		fmt.Println("No rows were returned!")
+		log.Println("No rows were returned!")
 		return -1
 	case nil:
 		return userId
@@ -73,16 +73,16 @@ func (dbRepository *DBRepository) SaveTransactions(customer_id int, transactions
 
 	tx, err := dbRepository.db.Begin()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Unable to inicialize database. %v", err)
 	}
 	defer tx.Rollback() // The rollback will be ignored if the tx has been committed later in the function.
 
 	if _, err = tx.Exec(sqlQuery, tnxsValues...); err != nil {
-		log.Fatal(err)
+		log.Fatalf("Unable to execute the query. %v", err)
 	}
 
 	if err := tx.Commit(); err != nil {
-		log.Fatal(err)
+		log.Fatalf("Unable to commit the query. %v", err)
 	}
 
 	return nil

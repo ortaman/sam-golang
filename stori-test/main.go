@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 
 	"github.com/ortaman/stori-test/adapters"
+	"github.com/ortaman/stori-test/entity"
 	"github.com/ortaman/stori-test/infra"
 	"github.com/ortaman/stori-test/repository"
 	"github.com/ortaman/stori-test/usecase"
@@ -22,21 +23,22 @@ const (
 
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-	// Validate that email exis in the body request
+	// Validate the body request
 	bodyMap := map[string]string{}
 
 	if err := json.Unmarshal([]byte(request.Body), &bodyMap); err != nil {
 		return events.APIGatewayProxyResponse{
-			Body:       err.Error(),
+			Body:       fmt.Sprintf(entity.ErrorBody.Error(), err.Error()),
 			StatusCode: 400,
 		}, nil
 	}
 
+	// Validate that email exists
 	email, emailExist := bodyMap["email"]
 
 	if !emailExist {
 		return events.APIGatewayProxyResponse{
-			Body:       "Email field is required",
+			Body:       fmt.Sprintf(entity.ErrEmail.Error(), "email"),
 			StatusCode: 400,
 		}, nil
 	}
@@ -46,7 +48,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 	if err != nil {
 		return events.APIGatewayProxyResponse{
-			Body:       err.Error(),
+			Body:       fmt.Sprintf(entity.ErrCSV.Error(), err.Error()),
 			StatusCode: 400,
 		}, nil
 	}
@@ -56,21 +58,34 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 	if err != nil {
 		return events.APIGatewayProxyResponse{
-			Body:       err.Error(),
+			Body:       fmt.Sprintf(entity.ErrTrxsValid.Error(), err.Error()),
 			StatusCode: 500,
 		}, nil
 	}
 
 	db := infra.NewMyPSQLConnection()
-	PSQConfig := infra.NewPSQLConfig()
-
 	dbRepository := repository.NewSQLRepository(db)
+
+	PSQConfig := infra.NewPSQLConfig()
 	emailRepository := repository.NewEmailRepository(PSQConfig)
 
 	tnxsUsercase := usecase.NewTnxsUsecase(dbRepository, emailRepository)
 
-	tnxsUsercase.SaveTransactions(email, &transactionData)
-	tnxsUsercase.SendEmail(&transactionData, []string{email}, templateDir)
+	// Calculate transactions
+	if err := tnxsUsercase.SaveTransactions(email, &transactionData); err != nil {
+		return events.APIGatewayProxyResponse{
+			Body:       fmt.Sprintf(entity.ErrTrxnSave.Error(), err.Error()),
+			StatusCode: 500,
+		}, nil
+	}
+
+	// Calculate Transaction resume and send email
+	if err := tnxsUsercase.SendEmail(&transactionData, []string{email}, templateDir); err != nil {
+		return events.APIGatewayProxyResponse{
+			Body:       fmt.Sprintf(entity.ErrTrxnSave.Error(), err.Error()),
+			StatusCode: 500,
+		}, nil
+	}
 
 	return events.APIGatewayProxyResponse{
 		Body:       fmt.Sprintf("Transactions Resume sent : %s", email),

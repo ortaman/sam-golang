@@ -27,10 +27,12 @@ func (emailRepository *EmailRepository) SendEmail(transactionsResume *entity.Tra
 	template, TemplatError := template.ParseFiles(termplateDir)
 
 	if TemplatError != nil {
-		return fmt.Errorf("%s", TemplatError.Error())
+		return fmt.Errorf("unable to parse email template. %s", TemplatError.Error())
 	}
 
-	template.Execute(&body, *transactionsResume)
+	if err := template.Execute(&body, *transactionsResume); err != nil {
+		return fmt.Errorf("unable to execute email html. %v", err)
+	}
 
 	Emailconfig := *emailRepository.PSQLConfig
 
@@ -45,7 +47,7 @@ func (emailRepository *EmailRepository) SendEmail(transactionsResume *entity.Tra
 		body.Bytes())
 
 	if emailError != nil {
-		return fmt.Errorf("%s", emailError.Error())
+		return fmt.Errorf("send email failed. %s", emailError.Error())
 	}
 
 	return nil

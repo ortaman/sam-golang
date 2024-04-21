@@ -15,6 +15,7 @@ Resources:
   StoriTestFunction:
     Type: AWS::Serverless::Function
     Properties:
+      CodeUri: stori_test/
       ImageUri: !Sub 'storitestfunction:${DockerTag}' 
       PackageType: Image
       Architectures:

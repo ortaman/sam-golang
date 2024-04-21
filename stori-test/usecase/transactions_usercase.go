@@ -89,7 +89,9 @@ func (tnxsUsercase *TnxsUsercase) SendEmail(transactions *[]entity.Transaction, 
 		TxnsNumberPerMonth: txnsNumberPerMonth,
 	}
 
-	tnxsUsercase.emailRepoI.SendEmail(&transactionResume, emails_to, termplateDir)
+	if err := tnxsUsercase.emailRepoI.SendEmail(&transactionResume, emails_to, termplateDir); err != nil {
+		return err
+	}
 
 	return nil
 }
