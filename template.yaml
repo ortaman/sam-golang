@@ -15,8 +15,6 @@ Resources:
   StoriTestFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: stori_test/
-      ImageUri: !Sub 'storitestfunction:${DockerTag}' 
       PackageType: Image
       Architectures:
         - x86_64
@@ -49,7 +47,7 @@ Outputs:
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/stori-test/"
   StoriTestFunction:
     Description: "Stori Test Lambda Function ARN"
-    Value: !GetAtt StortiTestFunction.Arn
+    Value: !GetAtt StoriTestFunction.Arn
   StoriTestFunctionIamRole:
     Description: "Implicit IAM Role created for Stori Test function"
     Value: !GetAtt StoriTestFunctionRole.Arn

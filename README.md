@@ -51,8 +51,8 @@ make test-local            -- run in another terminal (Invoke lambda function lo
 `curl "http://localhost:3000/stori-test" -d "{\"email\":\"username@email.com\"}"`
 ```
 
-**To deploy your application for the first time, run the following in your shell:**
+**To run the aplication deployed in AWS run:**
 
 ```bash
-sam deploy --guided
+curl -X POST https://13kcl4xovc.execute-api.us-east-1.amazonaws.com/Prod/stori-test -H "Content-Type: application/json"  -d "{\"email\":\"username@email.com\"}"
 ```

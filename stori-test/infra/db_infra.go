@@ -21,7 +21,10 @@ func NewMyPSQLConnection() *sql.DB {
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbName)
 
-	fmt.Println("psqlInfo: ", psqlInfo)
+	if lambdaEnv := os.Getenv("PG_DSN"); len(lambdaEnv) != 0 {
+		psqlInfo = os.Getenv("PG_DSN")
+	}
+
 	db, err := sql.Open(driver, psqlInfo)
 
 	if err != nil {
